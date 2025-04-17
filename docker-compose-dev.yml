@@ -1,0 +1,21 @@
+services:
+  decs_locator:
+    container_name: decs_locator
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+
+    ports:
+      - 8000:8000
+
+    environment:
+      - APP_VER=${APP_VER}
+
+    networks:
+      - nginx-proxy
+
+networks:
+  nginx-proxy:
+      external: true

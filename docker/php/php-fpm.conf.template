@@ -1,0 +1,35 @@
+[global]
+error_log = /proc/self/fd/2
+; https://github.com/docker-library/php/pull/725#issuecomment-443540114
+log_limit = 8192
+daemonize = no
+
+[www]
+user = daemon
+group = daemon
+
+access.log = /proc/self/fd/2
+catch_workers_output = yes
+decorate_workers_output = no
+
+pm = dynamic
+; pm.max_children = [Available RAM] / [Average Process Size]. Ex. 7168MB / 30MB = 238
+pm.max_children = ${PHP_PM_MAX_CHILDREN}
+; pm.start_servers = 25% of max_children
+pm.start_servers = ${PHP_PM_START_SERVERS}
+; pm.min_spare_servers = 25% of max_children
+pm.min_spare_servers = ${PHP_PM_MIN_SPARE_SERVERS}
+; pm.max_spare_servers = 75% of max_children
+pm.max_spare_servers = ${PHP_PM_MAX_SPARE_SERVERS}
+
+pm.process_idle_timeout = 20s
+pm.max_requests = ${PHP_PM_MAX_REQUESTS}
+
+; Terminate requests that run longer than 5 minutes
+request_terminate_timeout = 300
+
+clear_env = no
+
+; Enable listen por socket
+listen = /var/run/php-fpm.sock
+listen.mode = 0666
