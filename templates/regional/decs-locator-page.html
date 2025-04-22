@@ -28,7 +28,7 @@
 				<div class="col-md-12 box4">
 					<div class="form-group">
 						<label for=""><b>{{ texts.DECS_LOOKUP }}</b></label>
-                        <form action="{{ constant("SEARCH_URL") }}decs-locator/" id="DeCSForm">
+                        <form action="/locate/" id="DeCSForm">
                             <input type="hidden" name="lang" value="{{lang}}"/>
                             <input type="hidden" name="mode" value="{{mode}}"/>
                             <input type="hidden" name="tree_id" id="tree_id" value=""/>
@@ -324,13 +324,8 @@
 {% endblock %}
 
 {% block footerscripts %}
-    {% if config.use_external_cdn == 'true' %}
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.min.css" />
     <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
-    {% else %}
-    <link rel="stylesheet" href="{{ asset('regional/css/jquery-ui.min.css') }}" />
-    <script src="{{ asset('regional/js/jquery-ui.min.js') }}"></script>
-    {% endif %}
 
     <script>
         // autocomplete
@@ -339,7 +334,7 @@
              $( "#query" ).autocomplete({
                   source: function( request, response ) {
                     $.ajax({
-                      url: '{{ constant("SEARCH_URL") }}decs-locator-autocomplete/{{ lang }}/',
+                      url: '/autocomplete/{{ lang }}/',
                       dataType: "jsonp",
                       data: {
                         count: 100,
