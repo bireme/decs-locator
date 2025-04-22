@@ -17,7 +17,7 @@ final class DeCSLocatorAutoComplete extends AbstractController
     ){}
 
 
-    #[Route('decs-locator-autocomplete/{lang}/')]
+    #[Route('autocomplete/{lang}/')]
     public function index(Request $request, string $lang): Response
     {
 

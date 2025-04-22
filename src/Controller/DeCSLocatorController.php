@@ -18,8 +18,7 @@ final class DeCSLocatorController extends AbstractController
         private CacheService $cache,
     ){}
 
-
-    #[Route('decs-locator/')]
+    #[Route('locate/')]
     public function index(Request $request): Response
     {
 
