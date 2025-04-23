@@ -1,0 +1,31 @@
+[global]
+error_log = /proc/self/fd/2
+; https://github.com/docker-library/php/pull/725#issuecomment-443540114
+log_limit = 8192
+daemonize = no
+
+[www]
+user = daemon
+group = daemon
+
+access.log = /proc/self/fd/2
+catch_workers_output = yes
+decorate_workers_output = no
+
+pm = dynamic
+pm.max_children = 6
+pm.start_servers = 3
+pm.min_spare_servers = 3
+pm.max_spare_servers = 5
+
+pm.process_idle_timeout = 10s
+pm.max_requests = 500
+
+; Terminate requests that run longer than 5 minutes
+request_terminate_timeout = 300
+
+clear_env = no
+
+; Enable listen por socket
+listen = /var/run/php-fpm.sock
+listen.mode = 0666

@@ -1,0 +1,54 @@
+services:
+  decs_locator:
+    container_name: decs-locator
+    restart: unless-stopped
+    build:
+      context: .
+      target: prod
+    image: ${IMAGE_TAG}
+    volumes:
+      - static_files:/app/public
+      - phpsock:/var/run
+    environment:
+      - TZ=${TIMEZONE}
+
+  decs_locator_webserver:
+    image: nginx:1.25-alpine
+    container_name: decs-locator-webserver
+    restart: unless-stopped
+    expose:
+      - 80
+    volumes:
+      - static_files:/app/public
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/templates:/etc/nginx/templates
+      - ./docker/nginx/.htpasswd:/etc/nginx/.htpasswd
+      - ./docker/nginx/robots.txt:/app/public/robots.txt
+      - phpsock:/var/run
+    depends_on:
+      - decs_locator
+    environment:
+      - VIRTUAL_HOST=${VIRTUAL_HOST}
+      - LETSENCRYPT_HOST=${VIRTUAL_HOST}
+      - USE_AUTHENTICATION=${USE_AUTHENTICATION}
+      - TZ=${TIMEZONE}
+    networks:
+      - nginx-proxy
+
+  decs_locator_cache:
+    image: bitnami/redis:7.2
+    container_name: decs-locator-cache
+    restart: unless-stopped
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_AOF_ENABLED=no
+      - TZ=${TIMEZONE}
+    command:  /opt/bitnami/scripts/redis/run.sh --maxmemory ${APP_CACHE_MEMORY} --maxmemory-policy allkeys-lru
+
+volumes:
+  static_files:
+  phpsock:
+
+networks:
+  nginx-proxy:
+      external: true
