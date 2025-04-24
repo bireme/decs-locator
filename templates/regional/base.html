@@ -41,17 +41,6 @@
             {% endfor %}
         {% endif %}
 
-        {% block extrahead %}
-            {% if config.impact_measurement_code is defined and im_cookie is defined %}
-                {% for src in im_cookie %}
-                <script type="text/javascript">
-                    var el = document.createElement("img");
-                    el.setAttribute('src', "{{ src }}");
-                </script>
-                {% endfor %}
-            {% endif %}
-        {% endblock %}
-
         <noscript>Your browser doesn't support javascript.</noscript>
     {% endblock %}</head>
 
@@ -82,33 +71,9 @@
             <input type="hidden" name="lang" id="change_lang" value="{{ lang }}">
         </form>
 
-        <!-- survey box -->
-        {% if config.impact_measurement_code is defined %}
-        <div id="im_survey_box" class="im-ajax d-print-none">
-            <div id="boxFeedback">
-                <div id="conteudoFeedback">
-                    <div class="im-loading">
-                        <div class="col-md-12 text-center">
-                            <div class="spinner-border text-center">
-                                <span class="sr-only">...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="iconFeedback">
-                    <img src="{{ asset('regional/image/' ~ lang ~ '/iconFeedback.svg') }}" alt="">
-                </div>
-                <div class="clear"></div>
-            </div>
-        </div>
-        {% endif %}
-
         <!-- load base js files for pages -->
         <script src="//cdn.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js"></script>
         <script src="//cdn.jsdelivr.net/npm/bootstrap@4.6/dist/js/bootstrap.min.js"></script>
-
-        <!-- application js files -->
-        <script src="{{ asset('regional/js/main.js') }}"></script>
 
         {% block footerscripts %}
         {% endblock %}
