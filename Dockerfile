@@ -49,7 +49,7 @@ WORKDIR /app
 
 # Install project dependencies
 ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer install --optimize-autoloader --no-scripts
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Copy project files
 COPY . /app
