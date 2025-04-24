@@ -11,9 +11,7 @@
 ###< symfony/framework-bundle ###
 
 /.env
-/.env.local
-/.env.local.php
-/.env.*.local
+/.env.*
 
 ###> phpunit/phpunit ###
 /phpunit.xml
@@ -29,3 +27,6 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+
+DEV.txt
