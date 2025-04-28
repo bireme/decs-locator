@@ -146,7 +146,12 @@
 						</div>
 						<div class="col-md-6">
                             {% if decs.record_list.record is defined %}
-                                <form action="" onsubmit="make_search_query(); return false" id="searchDocsTrigger" data-test="decs_detail_box">
+                                <form
+                                    action="https://pesquisa.bvsalud.org/portal/" target="_blank" method="get"
+                                    id="searchForm" data-test="decs_detail_box">
+
+                                    <input type="hidden" name="lang" id="lang" value="{{ lang }}">
+
                                     {% if lang == 'pt' %}
                                         <strong>
                                             {% for descriptor_lang in decs.record_list.record.descriptor_list.descriptor %}
@@ -313,11 +318,9 @@
                                     {% endif %}
 
     								<div class="form-group">
-                                        <form action="" onsubmit="make_search_query(); return false" id="searchDocsTrigger">
-                                            {% if mode != 'dataentry'%}
-                                                <input type="submit" value="{{ texts.SEARCH_DOCUMENTS }}" class="btn btn-block btn-primary" data-test="search_button" />
-                                            {% endif %}
-                                        </form>
+                                        {% if mode != 'dataentry'%}
+                                            <input type="submit" value="{{ texts.SEARCH_DOCUMENTS }}" class="btn btn-block btn-primary" data-test="search_button" />
+                                        {% endif %}
     								</div>
 
                                 </form>
@@ -335,7 +338,13 @@
         // autocomplete
         $(document).ready(function() {
 
-             $( "#query" ).autocomplete({
+            {% if mode != 'dataentry'%}
+            $('#searchForm').on('submit', function(e) {
+                 make_search_query();
+            });
+            {% endif %}
+
+            $( "#query" ).autocomplete({
                   source: function( request, response ) {
                     $.ajax({
                       url: '/autocomplete/{{ lang }}/',
@@ -398,6 +407,9 @@
               return this.value;
             }).get();
 
+           // Remove any existing dynamically added inputs
+           $('#searchForm input[id^="decslocator"]').remove();
+
             // if user select qualifiers make combination query
             if (qlf_selected.length > 0){
                 $.each(qlf_selected, function(index, qlf){
@@ -408,9 +420,7 @@
                         value: '{{ decs.tree.self.term_list.term|default() }}/' + qlf
                     }).appendTo( $('#searchForm') );
                 });
-
             }else{
-
                 $('<input>').attr({
                     type: 'hidden',
                     id: 'decslocator',
@@ -419,11 +429,6 @@
                 }).appendTo( $('#searchForm') );
 
             }
-            // check and update skip filter page param
-            if ( $("#searchForm #skfp").length ){
-                $("#searchForm #skfp").val("true");
-            }
-            $('#searchForm').submit();
         }
 
         function postMsg(descriptor) {

@@ -35,15 +35,15 @@ services:
     networks:
       - nginx-proxy
 
-  decs_locator_cache:
-    image: bitnami/redis:7.2
-    container_name: decs-locator-cache
-    restart: unless-stopped
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-      - REDIS_AOF_ENABLED=no
-      - TZ=${TIMEZONE}
-    command:  /opt/bitnami/scripts/redis/run.sh --maxmemory ${APP_CACHE_MEMORY} --maxmemory-policy allkeys-lru
+  # decs_locator_cache:
+  #   image: bitnami/redis:7.2
+  #   container_name: decs-locator-cache
+  #   restart: unless-stopped
+  #   environment:
+  #     - ALLOW_EMPTY_PASSWORD=yes
+  #     - REDIS_AOF_ENABLED=no
+  #     - TZ=${TIMEZONE}
+  #   command:  /opt/bitnami/scripts/redis/run.sh --maxmemory ${APP_CACHE_MEMORY} --maxmemory-policy allkeys-lru
 
 volumes:
   static_files:

@@ -7,7 +7,7 @@ services:
     volumes:
       - .:/app
     ports:
-      - 8000:8000
+      - 8030:8000
     environment:
       - APP_VER=${APP_VER}
     networks:
