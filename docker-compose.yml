@@ -13,7 +13,7 @@ services:
       - TZ=${TIMEZONE}
 
   decs_locator_webserver:
-    image: nginx:1.25-alpine
+    image: nginx:1.31-alpine
     container_name: decs-locator-webserver
     restart: unless-stopped
     expose:
@@ -35,20 +35,10 @@ services:
     networks:
       - nginx-proxy
 
-  # decs_locator_cache:
-  #   image: bitnami/redis:7.2
-  #   container_name: decs-locator-cache
-  #   restart: unless-stopped
-  #   environment:
-  #     - ALLOW_EMPTY_PASSWORD=yes
-  #     - REDIS_AOF_ENABLED=no
-  #     - TZ=${TIMEZONE}
-  #   command:  /opt/bitnami/scripts/redis/run.sh --maxmemory ${APP_CACHE_MEMORY} --maxmemory-policy allkeys-lru
-
 volumes:
   static_files:
   phpsock:
 
 networks:
   nginx-proxy:
-      external: true
+    external: true

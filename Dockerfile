@@ -1,4 +1,4 @@
-FROM docker.io/bitnami/php-fpm:8.4 AS builder
+FROM docker.io/bitnamilegacy/php-fpm:8.4 AS builder
 
 # Install build packages and git
 RUN apt update -y && apt install -y git autoconf build-essential
@@ -27,7 +27,7 @@ CMD ["symfony", "server:start", "--allow-all-ip"]
 
 
 ##########################################################################
-FROM docker.io/bitnami/php-fpm:8.4 AS prod
+FROM docker.io/bitnamilegacy/php-fpm:8.4 AS prod
 
 # Copy configuration
 COPY ./docker/php/php-fpm.conf-production /opt/bitnami/php/etc/php-fpm.conf
