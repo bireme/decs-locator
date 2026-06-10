@@ -8,7 +8,7 @@ RUN curl -sS https://get.symfony.com/cli/installer | bash
 
 
 ##########################################################################
-FROM docker.io/bitnami/php-fpm:8.4 AS dev
+FROM docker.io/bitnamilegacy/php-fpm:8.4 AS dev
 
 # Copy configuration
 COPY ./docker/php/php-fpm.conf-development /opt/bitnami/php/etc/php-fpm.conf

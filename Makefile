@@ -55,6 +55,14 @@ dev_clear_app_cache:
 dev_clear_cache:
 	@docker compose -f $(COMPOSE_FILE_DEV) exec decs_locator php bin/console cache:pool:clear cache.global_clearer
 
+dev_install_packages:
+	@docker compose -f $(COMPOSE_FILE_DEV) exec decs_locator composer install
+
+dev_update_packages:
+	@docker compose -f $(COMPOSE_FILE_DEV) exec decs_locator composer update
+
+dev_update_symfony:
+	@docker compose -f $(COMPOSE_FILE_DEV) exec decs_locator composer update "symfony/*" --with-all-dependencies
 
 ## prod/test shortcuts
 build:
