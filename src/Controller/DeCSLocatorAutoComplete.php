@@ -26,13 +26,13 @@ final class DeCSLocatorAutoComplete extends AbstractController
           $params[$key] = $value;
         }
 
-        $query = $request->get('query');
-        $count = $request->get('count');
-        $query = str_replace(" ","+",$query);
+        $search_term = $request->query->get('query', '');
+        $count = $request->query->get('count');
+        $query = str_replace(" ","+",$search_term);
         $query = $this->auxFunctions->remove_accents($query);
         $query = $query . "+OR+" . $query ."*";
 
-        $jsoncallback = $request->get('callback');
+        $jsoncallback = $request->query->get('callback');
 
         $service_url = "http://srv.bvsalud.org/decsQuickTerm/search?query=" . $query . "&count=" . $count . "&lang=" . $lang;
 
@@ -56,7 +56,7 @@ final class DeCSLocatorAutoComplete extends AbstractController
         }
 
         $result = array(
-                    'query' => $_REQUEST['query'],
+                    'query' => $search_term,
                     'descriptors' => $descriptors,
                     );
         $result_json = json_encode($result);

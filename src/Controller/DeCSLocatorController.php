@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Service\CacheService;
+use App\Service\HttpFetchService;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,6 +17,7 @@ final class DeCSLocatorController extends AbstractController
 
     public function __construct(
         private CacheService $cache,
+        private HttpFetchService $httpFetch,
     ){}
 
     #[Route('locate/')]
@@ -32,9 +34,9 @@ final class DeCSLocatorController extends AbstractController
         // get texts used in template
         $texts = $this->cache->get_texts_decs_locator($lang);
 
-        $tree_id = $request->get("tree_id", "");        // D02.065.589.099.750.124
-        $descriptor = $request->get("descriptor", "");  // get detais of specific descriptor
-        $mode = $request->get("mode");                  // mode dataentry
+        $tree_id = $request->query->get("tree_id", "");        // D02.065.589.099.750.124
+        $descriptor = $request->query->get("descriptor", "");  // get detais of specific descriptor
+        $mode = $request->query->get("mode");                  // mode dataentry
 
         if ($descriptor != ''){
             $api_url = "https://api.bvsalud.org/decs/v2/search-boolean?lang=" . $lang;
@@ -58,16 +60,16 @@ final class DeCSLocatorController extends AbstractController
             $decs_xml = $this->cache->get_decs_first_level($lang, $API_KEY);
         }else{
             $context = stream_context_create($opts);
-            $api_result = file_get_contents($api_url, false, $context);
+            $api_result = $this->httpFetch->getContents($api_url, $context);
 
-            $decs_xml = simplexml_load_string($api_result);
+            $decs_xml = ($api_result !== false) ? @simplexml_load_string($api_result) : false;
         }
 
         // start session
         $SESSION = $request->getSession();
         $SESSION->start();
 
-        if ($decs_xml->decsws_response->tree->ancestors->term_list) {
+        if ($decs_xml !== false && isset($decs_xml->decsws_response->tree->ancestors->term_list)) {
             $ancestors_tree = array();
             foreach ($decs_xml->decsws_response->tree->ancestors->term_list->term as $ancestor) {
                 //var_dump($ancestor);
@@ -97,7 +99,7 @@ final class DeCSLocatorController extends AbstractController
         $output_array = array();
         $output_array['current_page'] = 'decs_lookup';
         $output_array['lang'] = $lang;
-        $output_array['decs'] = $decs_xml->decsws_response;
+        $output_array['decs'] = ($decs_xml !== false) ? $decs_xml->decsws_response : null;
         $output_array['ancestors_i_tree'] = (isset($ancestors_i_tree) ? $ancestors_i_tree : '');
         $output_array['texts'] = $texts;
         $output_array['tree_id_category'] = substr($tree_id,0,1);

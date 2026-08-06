@@ -5,8 +5,8 @@ log_limit = 8192
 daemonize = no
 
 [www]
-user = daemon
-group = daemon
+user = www-data
+group = www-data
 
 access.log = /proc/self/fd/2
 catch_workers_output = yes

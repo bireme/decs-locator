@@ -1,23 +1,39 @@
-FROM docker.io/bitnamilegacy/php-fpm:8.4 AS builder
+FROM docker.io/library/php:8.4-fpm AS builder
 
 # Install build packages and git
-RUN apt update -y && apt install -y git autoconf build-essential
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Symfony CLI
 RUN curl -sS https://get.symfony.com/cli/installer | bash
 
 
 ##########################################################################
-FROM docker.io/bitnamilegacy/php-fpm:8.4 AS dev
+FROM docker.io/library/php:8.4-fpm AS base
+
+# Install the extensions not bundled with the official image
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libicu-dev libzip-dev \
+    && docker-php-ext-install -j"$(nproc)" intl zip \
+    && rm -rf /var/lib/apt/lists/*
+
+# The project ships a self-contained php-fpm.conf with no include directive,
+# so the image default pool drop-ins would never be read anyway
+RUN rm -f /usr/local/etc/php-fpm.d/*.conf
+
+
+##########################################################################
+FROM base AS dev
 
 # Copy configuration
-COPY ./docker/php/php-fpm.conf-development /opt/bitnami/php/etc/php-fpm.conf
-COPY ./docker/php/php.ini-development /opt/bitnami/php/etc/php.ini
-
-ENV PHP_INI_SCAN_DIR /opt/bitnami/php/lib/inc
+COPY ./docker/php/php-fpm.conf-development /usr/local/etc/php-fpm.conf
+COPY ./docker/php/php.ini-development /usr/local/etc/php/php.ini
 
 # Copy Symfony CLI from builder stage
 COPY --from=builder /root/.symfony5/bin/symfony /usr/local/bin/symfony
+
+# Copy composer binary to the image
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /app
 
@@ -27,22 +43,17 @@ CMD ["symfony", "server:start", "--allow-all-ip"]
 
 
 ##########################################################################
-FROM docker.io/bitnamilegacy/php-fpm:8.4 AS prod
+FROM base AS prod
 
 # Copy configuration
-COPY ./docker/php/php-fpm.conf-production /opt/bitnami/php/etc/php-fpm.conf
-COPY ./docker/php/php.ini-production /opt/bitnami/php/etc/php.ini
-
-ENV PHP_INI_SCAN_DIR /opt/bitnami/php/lib/inc
-
-# Copy Symfony CLI from builder stage
-COPY --from=builder /root/.symfony5/bin/symfony /usr/local/bin/symfony
+COPY ./docker/php/php-fpm.conf-production /usr/local/etc/php-fpm.conf
+COPY ./docker/php/php.ini-production /usr/local/etc/php/php.ini
 
 # Copy composer binary to the image
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 # Copy dependencies control files
-COPY composer.json composer.lock /app
+COPY composer.json composer.lock /app/
 
 # Change to app directory
 WORKDIR /app
@@ -60,8 +71,8 @@ RUN php bin/console asset-map:compile
 # Generate environment prod
 RUN composer dump-env prod
 
-# Change cache directory permissions
-RUN chmod -R o+w /app/var/cache/
+# Give the FPM workers write access to var/
+RUN chown -R www-data:www-data /app/var
 
 ARG DOCKER_TAG
 ENV APP_VER=$DOCKER_TAG
