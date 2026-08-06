@@ -113,7 +113,7 @@ update_packages:
 
 clear_app_cache:
 	@docker compose exec decs_locator php bin/console cache:clear
-	@docker compose exec decs_locator /bin/sh -c 'chmod -R o+w /app/var/cache/'
+	@docker compose exec decs_locator /bin/sh -c 'chown -R www-data:www-data /app/var/cache/'
 
 clear_cache:
 	@docker compose exec decs_locator php bin/console cache:pool:clear cache.global_clearer

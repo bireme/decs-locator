@@ -61,14 +61,25 @@ class CacheService
             $opts = array(
                 'http'=>array(
                   'method' => "GET",
-                  'header' =>' apikey: ' . $api_key
+                  'header' =>' apikey: ' . $api_key,
+                  'timeout' => 15,
                 )
             );
             $context = stream_context_create($opts);
             $api_response = @file_get_contents($api_url, false, $context);
 
+            if ($api_response === false) {
+                error_log("CacheService: failed to fetch DeCS first level for lang={$lang}");
+                $item->expiresAfter(0);
+                return '';
+            }
+
             return $api_response;
         });
+
+        if (empty($first_level_str)) {
+            return false;
+        }
 
         // Convert string to SimpleXMLElement
         $first_level_xml = simplexml_load_string($first_level_str);
