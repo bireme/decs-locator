@@ -13,7 +13,7 @@ services:
       - TZ=${TIMEZONE}
 
   decs_locator_webserver:
-    image: nginx:1.31-alpine
+    image: nginx:1.30-alpine
     container_name: decs-locator-webserver
     restart: unless-stopped
     expose:
