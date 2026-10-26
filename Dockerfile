@@ -1,4 +1,4 @@
-FROM docker.io/library/php:8.4-fpm AS builder
+FROM docker.io/library/php:8.5-fpm AS builder
 
 # Install build packages and git
 RUN apt-get update && apt-get install -y --no-install-recommends git \
@@ -9,7 +9,7 @@ RUN curl -sS https://get.symfony.com/cli/installer | bash
 
 
 ##########################################################################
-FROM docker.io/library/php:8.4-fpm AS base
+FROM docker.io/library/php:8.5-fpm AS base
 
 # Install the extensions not bundled with the official image
 RUN apt-get update \
@@ -65,11 +65,12 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 # Copy project files
 COPY . /app
 
+# Generate environment prod (before any console command, so they boot in prod
+# instead of the dev environment set in .env)
+RUN composer dump-env prod
+
 # Compile project assets
 RUN php bin/console asset-map:compile
-
-# Generate environment prod
-RUN composer dump-env prod
 
 # Give the FPM workers write access to var/
 RUN chown -R www-data:www-data /app/var

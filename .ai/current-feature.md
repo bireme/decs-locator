@@ -1,4 +1,4 @@
-# Current Feature: Replace Bitnami Legacy PHP image with Official PHP Docker Image
+# Current Feature: Update PHP version to 8.5.x
 
 ## Status
 
@@ -10,27 +10,28 @@ Completed
 
 <!-- Goals & requirements -->
 
-- Replace all `docker.io/bitnamilegacy/php-fpm:8.4` base images in the `Dockerfile` (builder, dev, prod stages) with the official `php:8.4-fpm` image
-- Port the PHP/PHP-FPM configuration from Bitnami paths (`/opt/bitnami/php/etc/`) to the official image paths (`/usr/local/etc/php/`, `/usr/local/etc/php-fpm.d/`), adapting `docker/php/php.ini-*` and `docker/php/php-fpm.conf-*` as needed
-- Install the PHP extensions the app requires (previously bundled by Bitnami) explicitly via `docker-php-ext-install` / `pecl`, verified against `composer.json` platform requirements
-- Keep the existing multi-stage layout and behaviour: Symfony CLI in `dev` (`symfony server:start` on port 8000), composer install + asset-map:compile + dump-env in `prod`, `APP_VER` build arg
-- Keep the prod FPM unix socket contract working with the nginx container (`phpsock` volume mounted at `/var/run`) and the `static_files` volume
-- Both `docker-compose-dev.yml` and `docker-compose.yml` stacks build and run; the app responds correctly on all routes
+- Bump the `builder` and `base` stages in the `Dockerfile` from `php:8.4-fpm` to `php:8.5-fpm` (tracking the latest 8.5.x patch)
+- `intl` and `zip` extensions still build and load via `docker-php-ext-install`; OPcache stays active in prod
+- `docker/php/php.ini-*` and `docker/php/php-fpm.conf-*` remain valid on 8.5 (no removed/renamed directives, no startup warnings)
+- All Composer dependencies install on 8.5 (Symfony 7.4 LTS and the rest of `composer.lock`), updating packages only where needed for compatibility
+- No new PHP 8.5 deprecations from app code (`src/`); vendor deprecations noted if any
+- Both `docker-compose-dev.yml` and `docker-compose.yml` stacks build and run, and the app responds correctly on all routes
 
 ## Notes
 
 <!-- Any extra notes -->
 
-- Motivation: Bitnami moved its catalog to `bitnamilegacy` (see commit `ef2a130`); those images are unmaintained, so moving to the official Docker Hub PHP images removes the dead-end dependency.
-- Files in scope: `Dockerfile`, `docker/php/php.ini-development`, `docker/php/php.ini-production`, `docker/php/php-fpm.conf-development`, `docker/php/php-fpm.conf-production`, possibly `docker/nginx/*` (socket path) and `Makefile`.
-- Watch out for: file ownership/permissions (Bitnami runs as non-root `1001`, official runs as root with `www-data`), `PHP_INI_SCAN_DIR`, cache dir writability (`chmod -R o+w /app/var/cache/`), and the FPM listen socket path.
-- Runs on PHP 8.4 with Symfony 7.4 LTS (see previous feature).
+- Current state: official `php:8.4-fpm` image (see previous feature); `composer.json` requires `php >=8.2`, so the constraint doesn't block 8.5 — decide whether to raise it.
+- Files in scope: `Dockerfile`, possibly `docker/php/*`, `composer.json`/`composer.lock`, and docs mentioning PHP 8.4.
+- `make build_update_php` (`--pull --no-cache`) already exists for refreshing the base image.
+- Watch out for: PHP 8.5 deprecations (e.g. non-canonical cast names, backtick operator, `__sleep`/`__wakeup` soft deprecation), and OPcache being always compiled-in on 8.5 (check `opcache` ini settings still apply).
+- Unrelated uncommitted change in `config/reference.php` (Symfony-regenerated config reference) is in the working tree — handle separately or commit alongside.
 
 ## Detailed Plan
 
 <!-- Link to detailed plan file -->
 
-[002-official-php-docker-image.md](.ai/plans/002-official-php-docker-image.md)
+[003-update-php-8-5.md](.ai/plans/003-update-php-8-5.md)
 
 ## History
 
@@ -39,3 +40,5 @@ Completed
 - 2026-06-10: Starting Upgrade Symfony 7.2 → 7.4 LTS — following plan [001-upgrade-symfony-7-4.md](.ai/plans/001-upgrade-symfony-7-4.md)
 - 2026-06-10: Completed Upgrade Symfony 7.2 → 7.4 LTS — bumped all symfony/* from 7.2.* to 7.4.* (installed 7.4.13); verified boot, cache clear, and both routes on PHP 8.4. See [log](.ai/logs/2026-06-10-upgrade-symfony-7-4.md).
 - 2026-08-06: Starting Replace Bitnami Legacy PHP image with Official PHP Docker Image — following plan [002-official-php-docker-image.md](.ai/plans/002-official-php-docker-image.md)
+- 2026-08-06: Completed Replace Bitnami Legacy PHP image with Official PHP Docker Image — all stages on `php:8.4-fpm` with `intl`/`zip`, config moved to `/usr/local/etc`, FPM workers as `www-data`; OPcache now active in prod. Also fixed the `Request::get()` deprecations in the autocomplete controller. See [log](.ai/logs/2026-08-06-official-php-docker-image.md).
+- 2026-10-26: Starting Update PHP version to 8.5.x — following plan [003-update-php-8-5.md](.ai/plans/003-update-php-8-5.md)

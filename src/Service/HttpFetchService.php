@@ -18,9 +18,11 @@ class HttpFetchService
                 'http' => ['timeout' => self::getTimeout()],
             ]);
         }
+        http_clear_last_response_headers();
         $result = @file_get_contents($url, false, $context);
-        if (isset($http_response_header)) {
-            $this->responseHeaders = $http_response_header;
+        $headers = http_get_last_response_headers();
+        if ($headers !== null) {
+            $this->responseHeaders = $headers;
         }
         return $result;
     }

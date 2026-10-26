@@ -1,0 +1,29 @@
+# Installed in the prod stage by `composer install --no-dev`; a local copy
+# would overwrite it with dev packages and a dev autoloader
+vendor/
+
+# Generated: cache/logs, compiled assets and installed bundle assets
+var/
+public/assets/
+public/bundles/
+
+# Only the PHP configs are copied into the image; nginx config (including
+# .htpasswd) is bind-mounted into the webserver container
+docker/nginx/
+
+# VCS, tooling, notes and tests
+.git/
+.gitignore
+.ai/
+.claude/
+DEV.txt
+tests/
+phpunit.xml
+phpunit.xml.dist
+.phpunit.result.cache
+
+# Build and orchestration files
+Dockerfile
+.dockerignore
+docker-compose*.yml
+Makefile
