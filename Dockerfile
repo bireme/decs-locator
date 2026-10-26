@@ -1,4 +1,4 @@
-FROM docker.io/library/php:8.4-fpm AS builder
+FROM docker.io/library/php:8.5-fpm AS builder
 
 # Install build packages and git
 RUN apt-get update && apt-get install -y --no-install-recommends git \
@@ -9,7 +9,7 @@ RUN curl -sS https://get.symfony.com/cli/installer | bash
 
 
 ##########################################################################
-FROM docker.io/library/php:8.4-fpm AS base
+FROM docker.io/library/php:8.5-fpm AS base
 
 # Install the extensions not bundled with the official image
 RUN apt-get update \
