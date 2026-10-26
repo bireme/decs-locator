@@ -65,11 +65,12 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 # Copy project files
 COPY . /app
 
+# Generate environment prod (before any console command, so they boot in prod
+# instead of the dev environment set in .env)
+RUN composer dump-env prod
+
 # Compile project assets
 RUN php bin/console asset-map:compile
-
-# Generate environment prod
-RUN composer dump-env prod
 
 # Give the FPM workers write access to var/
 RUN chown -R www-data:www-data /app/var
